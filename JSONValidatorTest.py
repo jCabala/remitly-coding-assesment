@@ -5,6 +5,7 @@ from JSONValidator import JSONValidator
 
 VALID_TEST_PATH = "./testFiles/testTrue"
 INVALID_TEST_PATH = "./testFiles/testFalse"
+BAD_FORMAT_TEST_PATH = "./testFiles/testInvalidFormat"
 
 class JSONValidatorTest(unittest.TestCase):
 
@@ -41,23 +42,33 @@ class JSONValidatorTest(unittest.TestCase):
         with open(path) as f:
             return JSONValidator.validate_resource(json.load(f))
 
-    def test_true_with_path(self):
+    def check_format_helper(self, path):
+        with open(path) as f:
+            return JSONValidator.check_AWS_IAM_format(json.load(f))
+
+    def test_validate_resource_true_with_path(self):
         self.run_test(VALID_TEST_PATH, True, self.path_helper)
 
-    def test_false_with_path(self):
+    def test_validate_resource_false_with_path(self):
         self.run_test(INVALID_TEST_PATH, False, self.path_helper)
     
-    def test_true_with_string(self):
+    def test_validate_resource_true_with_string(self):
         self.run_test(VALID_TEST_PATH, True, self.string_helper)
 
-    def test_false_with_string(self):
+    def test_validate_resource_false_with_string(self):
         self.run_test(INVALID_TEST_PATH, False, self.string_helper)
     
-    def test_true_with_json(self):
+    def test_validate_resource_true_with_json(self):
         self.run_test(VALID_TEST_PATH, True, self.json_helper)
 
-    def test_false_with_json(self):
+    def test_validate_resource_false_with_json(self):
         self.run_test(INVALID_TEST_PATH, False, self.json_helper)
+
+    def test_check_AWS_IAM_format_false(self):
+        self.run_test(BAD_FORMAT_TEST_PATH, False, self.check_format_helper)
+
+    def test_check_AWS_IAM_format_true(self):
+        self.run_test(VALID_TEST_PATH, True, self.check_format_helper)
 
 if __name__ == '__main__':
     unittest.main()

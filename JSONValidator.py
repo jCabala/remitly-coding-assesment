@@ -6,18 +6,21 @@ import json
 STMT_KEY = "Statement"
 DOC_KEY = "PolicyDocument"
 RES_KEY = "Resource"
+NAME_KEY = "PolicyName"
 
 class JSONValidator:
 
     @staticmethod
     def validate_resource(data, isPath=False):
         """
-        Method returns fals eif any of the Resource fields in the given 
+        Method returns false if the given json is not in the AWS::IAM::Role Policy
+        Method returns false if any of the Resource fields in the given 
         JSON contains an asterix ('*') and true in any other case
 
         :param data: 
             JSON data either in a string format, already converted to a dictionary
-            or a path to a file containing JSON
+            or a path to a file containing JSON.
+            It must be in a AWS::IAM::Role format
         :param isPath:
             Set to true if data is a path to a file
         :return: boolean
@@ -34,6 +37,11 @@ class JSONValidator:
         else:
             raise Exception(f"Type mismatch. Expected string or dict but got {type(data)}")
 
+        if (not JSONValidator.check_AWS_IAM_format(json_data)):
+            print("ERROR: Given JSON does not follow the AWS::IAM::Role Policy format")
+            return False
+
+        # At this point json must contain the DOC_KEY
         doc = json_data.get(DOC_KEY)
         if not STMT_KEY in doc:
             # I assume that if Statement is empty than the Resource cannot contain an asterix
@@ -53,6 +61,13 @@ class JSONValidator:
                     return False
                     
         return True
+
+    @staticmethod
+    def check_AWS_IAM_format(json):
+        """
+        Checks if the document follows the desired format
+        """
+        return DOC_KEY in json and NAME_KEY in json
 
     @staticmethod
     def __list_wrap(x):
