@@ -8,55 +8,56 @@ INVALID_TEST_PATH = "./testFiles/testFalse"
 
 class JSONValidatorTest(unittest.TestCase):
 
+    def assertValidationWithPath(self, path, expected, fn):
+        try:
+            res = fn(path)
+            self.assertEqual(res, expected)
+        except AssertionError as e:
+            print(f"Error occured when testing {path}. Error message is: ")
+            print(e)
+
     def get_paths(self, path):
        return glob.glob(path + "/*.json") 
 
-    def run_test_with_path(self, dir_path, expected):
+    def run_test(self, dir_path, expected, fn):
+        paths = self.get_paths(dir_path)
+        for path in paths:
+            self.assertValidationWithPath(path, expected, fn)
+
+    def path_helper(self, path):
         """
         In validateResource(data) passes a path to a file
         """
-        paths = self.get_paths(dir_path)
-        for path in paths:
-            res = JSONValidator.validate_resource(path, isPath=True)
-            self.assertEqual(res, expected)
+        return JSONValidator.validate_resource(path, isPath=True)
     
-    def run_test_with_string(self, dir_path, expected):
-        """
-        In validateResource(data) passes a string containing the contents of the file
-        """
-        paths = self.get_paths(dir_path)
-        for path in paths:
-            with open(path) as f:
-                res = JSONValidator.validate_resource(f.read())
-                self.assertEqual(res, expected)
+    def string_helper(self, path):
+        with open(path) as f:
+            return JSONValidator.validate_resource(f.read())
     
-    def run_test_with_json(self, dir_path, expected):
+    def json_helper(self, path):
         """
         In validateResource(data) passes an object containing json from the file
         """
-        paths = self.get_paths(dir_path)
-        for path in paths:
-            with open(path) as f:
-                res = JSONValidator.validate_resource(json.load(f))
-                self.assertEqual(res, expected)
+        with open(path) as f:
+            return JSONValidator.validate_resource(json.load(f))
 
     def test_true_with_path(self):
-        self.run_test_with_path(VALID_TEST_PATH, True)
+        self.run_test(VALID_TEST_PATH, True, self.path_helper)
 
     def test_false_with_path(self):
-        self.run_test_with_path(INVALID_TEST_PATH, False)
+        self.run_test(INVALID_TEST_PATH, False, self.path_helper)
     
     def test_true_with_string(self):
-        self.run_test_with_string(VALID_TEST_PATH, True)
+        self.run_test(VALID_TEST_PATH, True, self.string_helper)
 
     def test_false_with_string(self):
-        self.run_test_with_string(INVALID_TEST_PATH, False)
+        self.run_test(INVALID_TEST_PATH, False, self.string_helper)
     
     def test_true_with_json(self):
-        self.run_test_with_json(VALID_TEST_PATH, True)
+        self.run_test(VALID_TEST_PATH, True, self.json_helper)
 
     def test_false_with_json(self):
-        self.run_test_with_json(INVALID_TEST_PATH, False)
+        self.run_test(INVALID_TEST_PATH, False, self.json_helper)
 
 if __name__ == '__main__':
     unittest.main()

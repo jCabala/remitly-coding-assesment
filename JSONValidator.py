@@ -1,5 +1,4 @@
 import json
-from collections.abc import Iterable
 
 # TODO: Add a possibility to pass already converted JSON as well
 # TODO: Write a method to verify the policy
@@ -37,18 +36,18 @@ class JSONValidator:
 
         doc = json_data.get(DOC_KEY)
         if not STMT_KEY in doc:
-            # TODO: Check if stmt can be empty. For now assume it can
+            # I assume that if Statement is empty than the Resource cannot contain an asterix
             return True
 
         # Statement can be an array or a single string  
-        stmts = JSONValidator.__get_iterable(doc.get(STMT_KEY)) 
+        stmts = JSONValidator.__list_wrap(doc.get(STMT_KEY)) 
 
         for stmt in stmts:
             if not RES_KEY in stmt:
-                # TODO: Check if resource can be empty. For now assume it can
+                # I assume that if a Resource is empty it cannot contain an asterix
                 continue
             # Resource can be an array or a single string
-            res = JSONValidator.__get_iterable(stmt.get(RES_KEY))
+            res = JSONValidator.__list_wrap(stmt.get(RES_KEY))
             for val in res:
                 if '*' in val:
                     return False
@@ -56,6 +55,9 @@ class JSONValidator:
         return True
 
     @staticmethod
-    def __get_iterable(x):
-        return [x] if not isinstance(x, Iterable) else x
+    def __list_wrap(x):
+        """
+        Creates a singelton list if an argument is not a list
+        """
+        return [x] if not isinstance(x, list) else x
 
