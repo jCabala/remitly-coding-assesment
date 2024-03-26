@@ -1,7 +1,6 @@
 import sys
 import os
-import json 
-from validator import validateJSON
+from JSONValidator import JSONValidator
 
 if __name__ == "__main__":
     if len(sys.argv) != 2:
@@ -15,6 +14,5 @@ if __name__ == "__main__":
         exit(1)
 
     print("The result of validation: ")
-    with open(path, 'r') as file:
-        print(validateJSON(file.read()))
+    print(JSONValidator.validate_resource(path, isPath=True))
 
